@@ -1,10 +1,13 @@
 public class Square {
 	private PieceTypes type;
     private char display;
-    public Square(PieceTypes initialType, char initialAppearance)
+    private PieceColor color; //idk if this is actually the way to do this but first i'll make functions that move pieces
+    //private boolean underAttack (oh god how am i going to implement this)
+    public Square(PieceTypes initialType, char initialAppearance, PieceColor initialColor)
     {
         type = initialType;
         display = initialAppearance;
+        color = initialColor;
     }
     public PieceTypes getType()
     {
@@ -21,5 +24,13 @@ public class Square {
     public void setDisplay(char newAppearance)
     {
         display = newAppearance;
+    }
+    public PieceColor getColor()
+    {
+        return color;
+    }
+    public void setColor(PieceColor newColor)
+    {
+        color = newColor;
     }
 }
