@@ -1,7 +1,8 @@
 import java.util.*;
 import java.io.IOException;
+import java.lang.Math;
 public class Main {
-    public static void printGrid(Square[][] griddy)
+    public static void printGrid(Square[][] griddy) //make one for white and one for black
     {
         //maybe add legend to the grid?
         for (int i = 8; i >= 1; i--)
@@ -13,7 +14,42 @@ public class Main {
             System.out.println();
         }
     }
-    //public static boolean isMoveValid(char pieceType, int[] moves {this is moveSummary eric}, griddy);
+    public static boolean isMoveValid(char pieceType, int[] moves, Square[][] griddy)
+    {
+        int deltaRow = moves[2] - moves[0];
+        int deltaColumn = moves[3] - moves[1];
+        if (pieceType == 'P' || pieceType == 'p') //white is uppercase, black is lowercase
+        {
+            if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            {
+                if (deltaColumn == 0 && deltaRow == 1)
+                {
+                    return griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                }
+                else if (Math.abs(deltaColumn) == 1 && deltaRow == 1)
+                {
+                    return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.BLACK;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else //black piece
+            {
+                if (deltaColumn == 0 && deltaRow == -1)
+                {
+                    return griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                }
+                else if (Math.abs(deltaColumn) == 1 && deltaRow == -1)
+                {
+                    return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.WHITE;
+                }
+            }
+        }
+        //TODO: add the remaining pieces
+        return false;
+    }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
     //rook: either delta x or delta y should be 0. if so, check if each square between them is empty.
@@ -38,7 +74,10 @@ public class Main {
             }
         }
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
-        grid[4][3] = new Square(PieceTypes.QUEEN, 'Q', PieceColor.EMPTY);
+        //grid[4][3] = new Square(PieceTypes.QUEEN, 'Q', PieceColor.WHITE);
+        grid[4][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
+        //grid[4][4] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
         printGrid(grid);
         /*for (int i = 8; i >= 1; i--)
         {
@@ -48,17 +87,31 @@ public class Main {
             }
             System.out.println();
         }*/
+        boolean firstTime = true;
+        boolean finished = true;
         Scanner scanner = new Scanner(System.in);
-        boolean invalidMove = true;
+        while (finished)
+        {
         String move = "";
+        boolean invalidMove = true;
         while (invalidMove)
         {
             System.out.println("Enter a move in this 5-character format: [PieceLetter][StartCoord][EndCoord]");
+            if (firstTime)
+            {
+                System.out.println("Enter \"Finished\" when you are done.");
+                firstTime = false;
+            }
             move = scanner.next();
             if (move.length() == 5)
             {
                 System.out.println();
                 invalidMove = false;
+            }
+            else if (move.equals("Finished"))
+            {
+                finished = false;
+                break;
             }
             else
             {
@@ -67,12 +120,12 @@ public class Main {
         }
         char piece = move.charAt(0); //make a function that takes this as a parameter and determines if the move is valid for that piece
         String start = move.substring(1, 3);
+        String end = move.substring(3);
         int startRow = start.charAt(1) - '0';
         int startColumn = start.charAt(0) - 96;
         int endRow = end.charAt(1) - '0';
         int endColumn = end.charAt(0) - 96;
         int[] moveSummary = {startRow, startColumn, endRow, endColumn}; //used for isMoveValid() function
-        String end = move.substring(3);
         try
         {
             if (grid[startRow][startColumn].getType() == PieceTypes.EMPTY)
@@ -82,24 +135,41 @@ public class Main {
             else
             {
                 //System.out.println("Cool");
-                if (grid[endRow][endColumn].getType() != PieceTypes.EMPTY)
+                //eventually remove this and deal with it in isMoveValid
+                // replace if else with this: if (isMoveValid(piece, moveSummary, grid)) move the piece, else say move invalid
+                if (isMoveValid(piece, moveSummary, grid))
                 {
-                    System.out.println("Square occupied.");
-                }
-                else
-                {
-                    //if (isMoveValid(piece, moveSummary, grid)) {do the stuff below}
+                    System.out.println("Move accepted.");
                     grid[endRow][endColumn] = grid[startRow][startColumn];
                     grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
                     //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
                     printGrid(grid);
                 }
+                else
+                {
+                    System.out.println("Invalid move.");
+                }
+                /*if (grid[endRow][endColumn].getType() != PieceTypes.EMPTY) 
+                {
+                    System.out.println("Square occupied.");
+                }*/
+                /*else
+                {
+                    grid[endRow][endColumn] = grid[startRow][startColumn];
+                    grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                    //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                    printGrid(grid);
+                }*/
             }
         } catch (ArrayIndexOutOfBoundsException e)
         {
-            System.out.println("Make sure the move is in range!");
+            if (finished)
+            {
+                System.out.println("Make sure the move is in range!");
+            }
         }
         System.out.println("Move: " + move);
+        }
         scanner.close();
     }
 }
