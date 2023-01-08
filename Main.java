@@ -1,4 +1,7 @@
 import java.util.*;
+
+import javax.lang.model.util.ElementScanner14;
+
 import java.io.IOException;
 import java.lang.Math;
 public class Main {
@@ -155,6 +158,169 @@ public class Main {
                 return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
             }
         }
+        else if (pieceType == 'B' || pieceType == 'b') //bishop
+        {
+            if (Math.abs(deltaRow) == Math.abs(deltaColumn) && deltaRow != 0 && deltaColumn != 0)
+            {
+                if (deltaRow > 0 && deltaColumn > 0)
+                {
+                    for (int i = 1; i < deltaRow; i++) //deltaRow or deltaColumn should work just for first quadrant
+                    {
+                        if (griddy[moves[0] + i][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (deltaRow > 0 && deltaColumn < 0)
+                {
+                    for (int i = 1; i < deltaRow; i++)
+                    {
+                        if (griddy[moves[0] + i][moves[1] - i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (deltaRow < 0 && deltaColumn < 0)
+                {
+                    for (int i = 1; i < Math.abs(deltaRow); i++)
+                    {
+                        if (griddy[moves[0] - i][moves[1] - i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaRow < 0 && deltaColumn > 0
+                {
+                    for (int i = 1; i < deltaColumn; i++)
+                    {
+                        if (griddy[moves[0] - i][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+            if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
+            }
+            else //black
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+            }
+        }
+        else if (pieceType == 'Q' || pieceType == 'q') //queen
+        {
+            if (deltaRow == 0 && deltaColumn != 0)
+            {
+                if (deltaColumn > 0)
+                {
+                    for (int i = 1; i < deltaColumn; i++)
+                    {
+                        if (griddy[moves[0]][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaColumn < 0
+                {
+                    for (int i = -1; i > deltaColumn; i--)
+                    {
+                        if (griddy[moves[0]][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else if (deltaColumn == 0 && deltaRow != 0)
+            {
+                if (deltaRow > 0)
+                {
+                    for (int i = 1; i < deltaRow; i++)
+                    {
+                        if (griddy[moves[0] + i][moves[1]].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaRow < 0
+                {
+                    for (int i = -1; i > deltaRow; i--)
+                    {
+                        if (griddy[moves[0] + i][moves[1]].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else if (Math.abs(deltaRow) == Math.abs(deltaColumn) && deltaRow != 0 && deltaColumn != 0)
+            {
+                if (deltaRow > 0 && deltaColumn > 0)
+                {
+                    for (int i = 1; i < deltaRow; i++) //deltaRow or deltaColumn should work just for first quadrant
+                    {
+                        if (griddy[moves[0] + i][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (deltaRow > 0 && deltaColumn < 0)
+                {
+                    for (int i = 1; i < deltaRow; i++)
+                    {
+                        if (griddy[moves[0] + i][moves[1] - i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (deltaRow < 0 && deltaColumn < 0)
+                {
+                    for (int i = 1; i < Math.abs(deltaRow); i++)
+                    {
+                        if (griddy[moves[0] - i][moves[1] - i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaRow < 0 && deltaColumn > 0
+                {
+                    for (int i = 1; i < deltaColumn; i++)
+                    {
+                        if (griddy[moves[0] - i][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+            if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
+            }
+            else //black
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+            }
+        }
+        //for king: no delta can be greater than one and can't move onto an allied piece. later: can't move onto attacked square.
         return false;
         } catch (ArrayIndexOutOfBoundsException e)
         {
@@ -187,13 +353,13 @@ public class Main {
             }
         }
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
-        grid[4][4] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
+        grid[4][4] = new Square(PieceTypes.QUEEN, 'Q', PieceColor.WHITE);
         //grid[4][4] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
         //grid[5][6] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
-        grid[4][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        //grid[4][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
         //grid[2][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
         //grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
-        //grid[7][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        grid[7][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
         printGrid(grid);
         /*for (int i = 8; i >= 1; i--)
         {
