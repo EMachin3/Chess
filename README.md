@@ -3,7 +3,7 @@ This is my attempt to create a chess game. Currently a work in progress.
 This will be my largest project ever, and will likely take quite some time to complete.
 Update on 1/8/23: The game is now completely functional! I still have many different ideas for what to add, though.    
 
-#TODO
+# TODO
 
 -Add promoting and castling (this is most important)    
 -Add function to determine what squares are under attack on a board and update the boolean fields of these squares accordingly    
