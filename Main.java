@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.IOException;
 import java.lang.Math;
 public class Main {
-    public static void printGrid(Square[][] griddy) //make one for white and one for black
+    public static void printGrid(Square[][] griddy) //make a print func for white and one for black
     {
         //maybe add legend to the grid?
         for (int i = 8; i >= 1; i--)
@@ -16,15 +16,21 @@ public class Main {
     }
     public static boolean isMoveValid(char pieceType, int[] moves, Square[][] griddy)
     {
+        try
+        {
         int deltaRow = moves[2] - moves[0];
         int deltaColumn = moves[3] - moves[1];
-        if (pieceType == 'P' || pieceType == 'p') //white is uppercase, black is lowercase
+        if (pieceType == 'P' || pieceType == 'p') //white is uppercase, black is lowercase. this is pawn
         {
             if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
             {
                 if (deltaColumn == 0 && deltaRow == 1)
                 {
                     return griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                }
+                else if (deltaColumn == 0 && deltaRow == 2 && moves[0] == 2)
+                {
+                    return griddy[moves[0] + 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
                 }
                 else if (Math.abs(deltaColumn) == 1 && deltaRow == 1)
                 {
@@ -41,14 +47,121 @@ public class Main {
                 {
                     return griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
                 }
+                else if (deltaColumn == 0 && deltaRow == -2 && moves[0] == 7)
+                {
+                    return griddy[moves[0] - 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                }
                 else if (Math.abs(deltaColumn) == 1 && deltaRow == -1)
                 {
                     return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.WHITE;
                 }
+                else
+                {
+                    return false;
+                }
+            } //1 down, 5 to go.
+        }
+        else if (pieceType == 'N' || pieceType == 'n') //knight
+        {
+            //if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            //{
+            if ((Math.abs(deltaRow) == 1 && Math.abs(deltaColumn) == 2) || (Math.abs(deltaRow) == 2 && Math.abs(deltaColumn) == 1))
+            {
+                if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+                {
+                    return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
+                }
+                else //black
+                {
+                    return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+                }
+            }
+            else
+            {
+                return false;
+            }
+            //}
+            //else //black
+            //{
+                /*if ((Math.abs(deltaRow) == 1 && Math.abs(deltaColumn) == 2) || (Math.abs(deltaRow) == 2 && Math.abs(deltaColumn) == 1))
+                {
+                    return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+                }
+                else
+                {
+                    return false;
+                }*/
+            //}
+        }
+        else if (pieceType == 'R' || pieceType == 'r') //rook
+        {
+            //if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            if (deltaRow == 0 && deltaColumn != 0)
+            {
+                if (deltaColumn > 0)
+                {
+                    for (int i = 1; i < deltaColumn; i++)
+                    {
+                        if (griddy[moves[0]][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaColumn < 0
+                {
+                    for (int i = -1; i > deltaColumn; i--)
+                    {
+                        if (griddy[moves[0]][moves[1] + i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else if (deltaColumn == 0 && deltaRow != 0)
+            {
+                if (deltaRow > 0)
+                {
+                    for (int i = 1; i < deltaRow; i++)
+                    {
+                        if (griddy[moves[0] + i][moves[1]].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else //deltaRow < 0
+                {
+                    for (int i = -1; i > deltaRow; i--)
+                    {
+                        if (griddy[moves[0] + i][moves[1]].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+            if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
+            }
+            else //black
+            {
+                return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
             }
         }
-        //TODO: add the remaining pieces
         return false;
+        } catch (ArrayIndexOutOfBoundsException e)
+        {
+            System.out.println("Move not in range.");
+            return false;
+        }
+        //TODO: add the remaining pieces, add an undo, make it so black gets a flipped print, add promoting and castling, make some way to initialize a grid from a text file
     }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
@@ -74,10 +187,13 @@ public class Main {
             }
         }
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
-        //grid[4][3] = new Square(PieceTypes.QUEEN, 'Q', PieceColor.WHITE);
-        grid[4][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
-        grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
-        //grid[4][4] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        grid[4][4] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
+        //grid[4][4] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
+        //grid[5][6] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
+        grid[4][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        //grid[2][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        //grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
+        //grid[7][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
         printGrid(grid);
         /*for (int i = 8; i >= 1; i--)
         {
