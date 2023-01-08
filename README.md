@@ -5,4 +5,4 @@ This will be my largest project ever, and will likely take quite some time to co
 # How to run      
 First, make sure you have Java installed. Put each .java file in the same directory, then open the directory in cmd.     
 Type "javac (filename).java" without quotations for each file.        
-Finally, type "java Main" to execute the program. Currently, only pawns can move.
+Finally, type "java Main" to execute the program. Currently, only pawns, knights, and rooks can move.
