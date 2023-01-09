@@ -2,7 +2,9 @@ import java.util.*;
 import java.io.IOException;
 import java.lang.Math;
 public class Main {
-    public static void printGridWhite(Square[][] griddy) //make a print func for white and one for black
+    public static boolean blackHasCastled = false;
+    public static boolean whiteHasCastled = false;
+    public static void printGridWhite(Square[][] griddy)
     {
         //maybe add legend to the grid?
         for (int i = 8; i >= 1; i--)
@@ -372,11 +374,71 @@ public class Main {
             {
                 if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
                 {
+                    whiteHasCastled = true; //can't castle after moving king
                     return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
                 }
                 else //black
                 {
+                    blackHasCastled = true;
                     return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+                }
+            }
+            else if (!whiteHasCastled && griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE && deltaRow == 0 && Math.abs(deltaColumn) == 2)
+            {
+                if (deltaColumn == 2)
+                {
+                    if (griddy[1][8].getType() == PieceTypes.ROOK && griddy[1][8].getColor() == PieceColor.WHITE)
+                    {
+                        whiteHasCastled = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //griddy[moves[2]][moves[3]] = griddy[moves[0]][moves[1]];
+                    //griddy[moves[0]][moves[1]] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                }
+                else //deltaColumn == -2
+                {
+                    if (griddy[1][1].getType() == PieceTypes.ROOK && griddy[1][1].getColor() == PieceColor.WHITE)
+                    {
+                        whiteHasCastled = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (!blackHasCastled && griddy[moves[0]][moves[1]].getColor() == PieceColor.BLACK && deltaRow == 0 && Math.abs(deltaColumn) == 2)
+            {
+                if (deltaColumn == 2)
+                {
+                    if (griddy[8][8].getType() == PieceTypes.ROOK && griddy[8][8].getColor() == PieceColor.BLACK)
+                    {
+                        blackHasCastled = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //griddy[moves[2]][moves[3]] = griddy[moves[0]][moves[1]];
+                    //griddy[moves[0]][moves[1]] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                }
+                else //deltaColumn == -2
+                {
+                    if (griddy[8][1].getType() == PieceTypes.ROOK && griddy[8][1].getColor() == PieceColor.BLACK)
+                    {
+                        blackHasCastled = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
         }
@@ -387,7 +449,7 @@ public class Main {
             System.out.println("Move not in range.");
             return false;
         }
-        //TODO: add an undo(would have to make a deep copy), add promoting and castling, make some way to initialize a grid from a text file
+        //TODO: add an undo(would have to make a deep copy), add promoting and castling, under attack algorithm make some way to initialize a grid from a text file, Fischer random chess?
     }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
@@ -414,6 +476,8 @@ public class Main {
             }
         }*/
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
+        //grid[7][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        //grid[2][3] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
         /*grid[4][4] = new Square(PieceTypes.KING, 'K', PieceColor.WHITE);
         //grid[4][4] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
         //grid[5][6] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
@@ -488,11 +552,75 @@ public class Main {
                         if (grid[moveSummary[0]][moveSummary[1]].getColor() == PieceColor.WHITE)
                         {
                             System.out.println("Move accepted.");
-                            grid[endRow][endColumn] = grid[startRow][startColumn];
+                            if (moveSummary[2] == 8 && (piece == 'P' || piece == 'p') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.PAWN)
+                            {
+                                boolean chosePromotion = true;
+                                char input;
+                                System.out.println("Promote to queen or knight? Type Q for queen or N for knight.");
+                                while (chosePromotion)
+                                {
+                                    input = scanner.next().charAt(0);
+                                    if (input == 'Q' || input == 'q')
+                                    {
+                                        grid[endRow][endColumn] = new Square(PieceTypes.QUEEN, 'Q', PieceColor.WHITE);
+                                        grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                        printGridBlack(grid);
+                                        printBlackGrid = !printBlackGrid;
+                                        chosePromotion = false;
+                                    }
+                                    else if (input == 'N' || input == 'n')
+                                    {
+                                        grid[endRow][endColumn] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
+                                        grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                        printGridBlack(grid);
+                                        printBlackGrid = !printBlackGrid;
+                                        chosePromotion = false;
+                                    }
+                                    else
+                                    {
+                                        System.out.println("Invalid input.");
+                                    }
+                                }
+                            }
+                            else if (Math.abs(endColumn - startColumn) == 2 && (piece == 'K' || piece == 'k') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.KING)
+                            //add system to isMoveValid to check if path between king and rook is clear
+                            {
+                                if (endColumn - startColumn == 2)
+                                {
+                                    grid[endRow][endColumn] = grid[startRow][startColumn];
+                                    grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    grid[1][6] = grid[1][8];
+                                    grid[1][8] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                    printGridBlack(grid);
+                                    printBlackGrid = !printBlackGrid;
+                                }
+                                else //endColumn - startColumn == -2
+                                {
+                                    grid[endRow][endColumn] = grid[startRow][startColumn];
+                                    grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    grid[1][4] = grid[1][1];
+                                    grid[1][1] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                    printGridBlack(grid);
+                                    printBlackGrid = !printBlackGrid;
+                                }
+                            }
+                            else
+                            {
+                                grid[endRow][endColumn] = grid[startRow][startColumn];
+                                grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                printGridBlack(grid);
+                                printBlackGrid = !printBlackGrid;
+                            }
+                            /*grid[endRow][endColumn] = grid[startRow][startColumn];
                             grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
                             //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
                             printGridBlack(grid);
-                            printBlackGrid = !printBlackGrid;
+                            printBlackGrid = !printBlackGrid;*/
                         }
                         else
                         {
@@ -503,12 +631,77 @@ public class Main {
                     {
                         if (grid[moveSummary[0]][moveSummary[1]].getColor() == PieceColor.BLACK)
                         {
-                            System.out.println("Move accepted.");
+                            if (moveSummary[2] == 1 && (piece == 'P' || piece == 'p') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.PAWN)
+                            {
+                                boolean chosePromotion = true;
+                                char input;
+                                System.out.println("Promote to queen or knight? Type q for queen or n for knight.");
+                                while (chosePromotion)
+                                {
+                                    input = scanner.next().charAt(0);
+                                    if (input == 'Q' || input == 'q')
+                                    {
+                                        grid[endRow][endColumn] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
+                                        grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                        printGridWhite(grid);
+                                        printBlackGrid = !printBlackGrid;
+                                        chosePromotion = false;
+                                    }
+                                    else if (input == 'N' || input == 'n')
+                                    {
+                                        grid[endRow][endColumn] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
+                                        grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                        //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                        printGridWhite(grid);
+                                        printBlackGrid = !printBlackGrid;
+                                        chosePromotion = false;
+                                    }
+                                    else
+                                    {
+                                        System.out.println("Invalid input.");
+                                    }
+                                }
+                            }
+                            else if (Math.abs(endColumn - startColumn) == 2 && (piece == 'K' || piece == 'k') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.KING)
+                            //add system to isMoveValid to check if path between king and rook is clear
+                            {
+                                if (endColumn - startColumn == 2)
+                                {
+                                    grid[endRow][endColumn] = grid[startRow][startColumn];
+                                    grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    grid[8][6] = grid[8][8];
+                                    grid[8][8] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                    printGridWhite(grid);
+                                    printBlackGrid = !printBlackGrid;
+                                }
+                                else //endColumn - startColumn == -2
+                                {
+                                    grid[endRow][endColumn] = grid[startRow][startColumn];
+                                    grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    grid[8][4] = grid[8][1];
+                                    grid[8][1] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                    //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                    printGridWhite(grid);
+                                    printBlackGrid = !printBlackGrid;
+                                }
+                            }
+                            else
+                            {
+                                System.out.println("Move accepted.");
+                                grid[endRow][endColumn] = grid[startRow][startColumn];
+                                grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                                //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
+                                printGridWhite(grid);
+                                printBlackGrid = !printBlackGrid;
+                            }
+                            /*System.out.println("Move accepted.");
                             grid[endRow][endColumn] = grid[startRow][startColumn];
                             grid[startRow][startColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
                             //new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); //clear console hopefully
                             printGridWhite(grid);
-                            printBlackGrid = !printBlackGrid;
+                            printBlackGrid = !printBlackGrid;*/
                         }
                         else
                         {
