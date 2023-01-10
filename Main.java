@@ -4,6 +4,18 @@ import java.lang.Math;
 public class Main {
     public static boolean blackHasCastled = false;
     public static boolean whiteHasCastled = false;
+    //public static boolean canEnPassant = false;
+    //public static Square twoSquarePawn = null;
+    /*have a global boolean variable called "canEnPassant" or something like that 
+    and then flip it on whenever someone moves two squares 
+    and at the end of my gameplay while loop set the variable to false */
+    /*  have an edge case in the isMoveValid() thing for if you try to do en passant 
+    and canEnPassant is true and the change in x is 1 and the change in y is 1 and 
+    your end position is one square above (white) or below (black) the piece that 
+    just moved two*/
+    /*have a global twoSquarePawn variable that stores the square object that just 
+    moved two squares, then isMoveValid can use that for comparisons.
+    and then set twoSquarePawn to be null whenever i set canEnPassant to be false */
     public static void printGridWhite(Square[][] griddy)
     {
         //maybe add legend to the grid?
@@ -368,6 +380,7 @@ public class Main {
                 return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
             }
         }
+        //add system to isMoveValid to check if path between king and rook is clear
         else if ((pieceType == 'K' || pieceType == 'k') && griddy[moves[0]][moves[1]].getType() == PieceTypes.KING) //king
         {
             if (Math.abs(deltaRow) <= 1 && Math.abs(deltaColumn) <= 1)
@@ -387,6 +400,13 @@ public class Main {
             {
                 if (deltaColumn == 2)
                 {
+                    for (int i = 6; i < 8; i++) //if under attack
+                    {
+                        if (griddy[1][i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
                     if (griddy[1][8].getType() == PieceTypes.ROOK && griddy[1][8].getColor() == PieceColor.WHITE)
                     {
                         whiteHasCastled = true;
@@ -401,6 +421,13 @@ public class Main {
                 }
                 else //deltaColumn == -2
                 {
+                    for (int i = 4; i > 1; i--) //if under attack
+                    {
+                        if (griddy[1][i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
                     if (griddy[1][1].getType() == PieceTypes.ROOK && griddy[1][1].getColor() == PieceColor.WHITE)
                     {
                         whiteHasCastled = true;
@@ -416,6 +443,13 @@ public class Main {
             {
                 if (deltaColumn == 2)
                 {
+                    for (int i = 6; i < 8; i++) //if under attack
+                    {
+                        if (griddy[8][i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
                     if (griddy[8][8].getType() == PieceTypes.ROOK && griddy[8][8].getColor() == PieceColor.BLACK)
                     {
                         blackHasCastled = true;
@@ -430,6 +464,13 @@ public class Main {
                 }
                 else //deltaColumn == -2
                 {
+                    for (int i = 4; i > 1; i--) //if under attack
+                    {
+                        if (griddy[8][i].getType() != PieceTypes.EMPTY)
+                        {
+                            return false;
+                        }
+                    }
                     if (griddy[8][1].getType() == PieceTypes.ROOK && griddy[8][1].getColor() == PieceColor.BLACK)
                     {
                         blackHasCastled = true;
@@ -449,7 +490,7 @@ public class Main {
             System.out.println("Move not in range.");
             return false;
         }
-        //TODO: add an undo(would have to make a deep copy), add promoting and castling, under attack algorithm make some way to initialize a grid from a text file, Fischer random chess?
+        //TODO: add an undo(would have to make a deep copy), add en passant, under attack algorithm, make some way to initialize a grid from a text file, Fischer random chess?
     }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
