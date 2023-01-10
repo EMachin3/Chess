@@ -4,8 +4,10 @@ import java.lang.Math;
 public class Main {
     public static boolean blackHasCastled = false;
     public static boolean whiteHasCastled = false;
-    //public static boolean canEnPassant = false;
-    //public static Square twoSquarePawn = null;
+    public static int canEnPassant = 0;
+    public static Square twoSquarePawn = null;
+    public static int twoSquarePawnRow = -1;
+    public static int twoSquarePawnColumn = -1;
     /*have a global boolean variable called "canEnPassant" or something like that 
     and then flip it on whenever someone moves two squares 
     and at the end of my gameplay while loop set the variable to false */
@@ -93,11 +95,35 @@ public class Main {
                 }
                 else if (deltaColumn == 0 && deltaRow == 2 && moves[0] == 2)
                 {
-                    return griddy[moves[0] + 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                    if (griddy[moves[0] + 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY)
+                    {
+                        twoSquarePawn = griddy[moves[0]][moves[1]];
+                        twoSquarePawnRow = moves[2];
+                        twoSquarePawnColumn = moves[3];
+                        canEnPassant = 2;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //canEnPassant = 2;
+                    //return griddy[moves[0] + 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
                 }
                 else if (Math.abs(deltaColumn) == 1 && deltaRow == 1)
                 {
-                    return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.BLACK;
+                    //if square empty etc
+                    if (griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY && (canEnPassant > 0) && moves[3] == twoSquarePawnColumn && moves[2] == twoSquarePawnRow + 1 /*&& twoSquarePawn.getColor() == PieceColor.BLACK*/)
+                    {
+                        griddy[twoSquarePawnRow][twoSquarePawnColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                        System.out.println("Set to ZERO");
+                        canEnPassant = 0; //code will later clean up global fields and move pawn
+                        return true;
+                    }
+                    else
+                    {
+                        return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.BLACK;
+                    }
                 }
                 else
                 {
@@ -112,12 +138,35 @@ public class Main {
                 }
                 else if (deltaColumn == 0 && deltaRow == -2 && moves[0] == 7)
                 {
-                    return griddy[moves[0] - 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
+                    if (griddy[moves[0] - 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY)
+                    {
+                        twoSquarePawn = griddy[moves[0]][moves[1]];
+                        twoSquarePawnRow = moves[2];
+                        twoSquarePawnColumn = moves[3];
+                        canEnPassant = 2;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //canEnPassant = 2;
+                    //return griddy[moves[0] - 1][moves[1]].getType() == PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY;
                 }
                 else if (Math.abs(deltaColumn) == 1 && deltaRow == -1)
                 {
-                    return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.WHITE;
-                }
+                    if (griddy[moves[2]][moves[3]].getType() == PieceTypes.EMPTY && (canEnPassant > 0) && moves[3] == twoSquarePawnColumn && moves[2] == twoSquarePawnRow - 1 /*&& twoSquarePawn.getColor() == PieceColor.WHITE*/)
+                    {
+                        griddy[twoSquarePawnRow][twoSquarePawnColumn] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                        System.out.println("Set to ZERO");
+                        canEnPassant = 0; //code will later clean up global fields and move pawn
+                        return true;
+                    }
+                    else
+                    {
+                        return griddy[moves[2]][moves[3]].getType() != PieceTypes.EMPTY && griddy[moves[2]][moves[3]].getColor() == PieceColor.WHITE;
+                    }
+                    }
                 else
                 {
                     return false;
@@ -490,7 +539,7 @@ public class Main {
             System.out.println("Move not in range.");
             return false;
         }
-        //TODO: add an undo(would have to make a deep copy), add en passant, under attack algorithm, make some way to initialize a grid from a text file, Fischer random chess?
+        //TODO: add an undo(would have to make a deep copy), under attack algorithm, make some way to initialize a grid from a text file(save to file with printwriter), Fischer random chess?
     }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
@@ -516,6 +565,10 @@ public class Main {
                 grid[i][j] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
             }
         }*/
+        //grid[2][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        //grid[4][5] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        //grid[1][1] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
+        //grid[8][8] = new Square(PieceTypes.ROOK, 'r', PieceColor.BLACK);
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
         //grid[7][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
         //grid[2][3] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
@@ -539,11 +592,14 @@ public class Main {
         boolean finished = true;
         boolean printBlackGrid = true;
         Scanner scanner = new Scanner(System.in);
+        boolean dontDecreaseEnPassant = false;
         while (finished)
         {
         String move = "";
-        boolean invalidMove = true;
-        while (invalidMove)
+        boolean invalidFormatting = true; //used for first loop
+        //boolean dontDecreaseEnPassant = false;
+        System.out.println("Current canEnPassant Value: " + canEnPassant);
+        while (invalidFormatting)
         {
             System.out.println("Enter a move in this 5-character format: [PieceLetter][StartCoord][EndCoord]");
             if (firstTime)
@@ -554,8 +610,8 @@ public class Main {
             move = scanner.next();
             if (move.length() == 5)
             {
-                System.out.println();
-                invalidMove = false;
+                //System.out.println();
+                invalidFormatting = false;
             }
             else if (move.equals("Finished"))
             {
@@ -579,6 +635,7 @@ public class Main {
         {
             if (grid[startRow][startColumn].getType() == PieceTypes.EMPTY)
             {
+                dontDecreaseEnPassant = true;
                 System.out.println("No piece there.");
             }
             else
@@ -588,6 +645,7 @@ public class Main {
                 // replace if else with this: if (isMoveValid(piece, moveSummary, grid)) move the piece, else say move invalid
                 if (isMoveValid(piece, moveSummary, grid))
                 {
+                    dontDecreaseEnPassant = false;
                     if (printBlackGrid) //white to move
                     {
                         if (grid[moveSummary[0]][moveSummary[1]].getColor() == PieceColor.WHITE)
@@ -621,6 +679,7 @@ public class Main {
                                     }
                                     else
                                     {
+                                        dontDecreaseEnPassant = true;
                                         System.out.println("Invalid input.");
                                     }
                                 }
@@ -665,6 +724,7 @@ public class Main {
                         }
                         else
                         {
+                            dontDecreaseEnPassant = true;
                             System.out.println("Tried to move black piece as white!");
                         }
                     }
@@ -700,6 +760,7 @@ public class Main {
                                     }
                                     else
                                     {
+                                        dontDecreaseEnPassant = true;
                                         System.out.println("Invalid input.");
                                     }
                                 }
@@ -746,6 +807,7 @@ public class Main {
                         }
                         else
                         {
+                            dontDecreaseEnPassant = true;
                             System.out.println("Tried to move white piece as black!");
                         }
                     }
@@ -765,6 +827,7 @@ public class Main {
                 }
                 else
                 {
+                    dontDecreaseEnPassant = true;
                     System.out.println("Invalid move.");
                 }
                 /*if (grid[endRow][endColumn].getType() != PieceTypes.EMPTY) 
@@ -783,10 +846,24 @@ public class Main {
         {
             if (finished)
             {
+                dontDecreaseEnPassant = true;
                 System.out.println("Make sure the move is in range!");
             }
         }
         System.out.println("Move: " + move);
+        if (canEnPassant > 0 && !dontDecreaseEnPassant)
+        {
+            canEnPassant--; //means that you only have one turn after canEnPassant is set to 2 to do it
+        }
+        else
+        {
+            if (twoSquarePawn != null)
+            {
+                twoSquarePawn = null;
+                twoSquarePawnRow = -1;
+                twoSquarePawnColumn = -1;
+            }
+        }
         }
         scanner.close();
     }
