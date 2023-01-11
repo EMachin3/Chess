@@ -1,13 +1,16 @@
 public class Square {
 	private PieceTypes type;
     private char display;
-    private PieceColor color; //idk if this is actually the way to do this but first i'll make functions that move pieces
-    //private boolean underAttack (oh god how am i going to implement this)
+    private PieceColor color;
+    private boolean whiteAttacking;
+    private boolean blackAttacking;
     public Square(PieceTypes initialType, char initialAppearance, PieceColor initialColor)
     {
         type = initialType;
         display = initialAppearance;
         color = initialColor;
+        whiteAttacking = false;
+        blackAttacking = false;
     }
     public PieceTypes getType()
     {
@@ -32,5 +35,21 @@ public class Square {
     public void setColor(PieceColor newColor)
     {
         color = newColor;
+    }
+    public boolean getWhiteAttacking()
+    {
+        return whiteAttacking;
+    }
+    public void setWhiteAttacking(boolean condition)
+    {
+        whiteAttacking = condition;
+    }
+    public boolean getBlackAttacking()
+    {
+        return blackAttacking;
+    }
+    public void setBlackAttacking(boolean condition)
+    {
+        blackAttacking = condition;
     }
 }
