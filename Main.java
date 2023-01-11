@@ -8,16 +8,6 @@ public class Main {
     public static Square twoSquarePawn = null;
     public static int twoSquarePawnRow = -1;
     public static int twoSquarePawnColumn = -1;
-    /*have a global boolean variable called "canEnPassant" or something like that 
-    and then flip it on whenever someone moves two squares 
-    and at the end of my gameplay while loop set the variable to false */
-    /*  have an edge case in the isMoveValid() thing for if you try to do en passant 
-    and canEnPassant is true and the change in x is 1 and the change in y is 1 and 
-    your end position is one square above (white) or below (black) the piece that 
-    just moved two*/
-    /*have a global twoSquarePawn variable that stores the square object that just 
-    moved two squares, then isMoveValid can use that for comparisons.
-    and then set twoSquarePawn to be null whenever i set canEnPassant to be false */
     public static void printGridWhite(Square[][] griddy)
     {
         //maybe add legend to the grid?
@@ -436,13 +426,31 @@ public class Main {
             {
                 if (griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE)
                 {
-                    whiteHasCastled = true; //can't castle after moving king
-                    return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
+                    if (griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE && !griddy[moves[2]][moves[3]].getBlackAttacking())
+                    {
+                        whiteHasCastled = true; //can't castle after moving king
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //whiteHasCastled = true; //can't castle after moving king
+                    //return griddy[moves[2]][moves[3]].getColor() != PieceColor.WHITE;
                 }
                 else //black
                 {
-                    blackHasCastled = true;
-                    return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
+                    if (griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK && !griddy[moves[2]][moves[3]].getWhiteAttacking())
+                    {
+                        blackHasCastled = true; //can't castle after moving king
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    //blackHasCastled = true;
+                    //return griddy[moves[2]][moves[3]].getColor() != PieceColor.BLACK;
                 }
             }
             else if (!whiteHasCastled && griddy[moves[0]][moves[1]].getColor() == PieceColor.WHITE && deltaRow == 0 && Math.abs(deltaColumn) == 2)
@@ -451,12 +459,12 @@ public class Main {
                 {
                     for (int i = 6; i < 8; i++) //if under attack
                     {
-                        if (griddy[1][i].getType() != PieceTypes.EMPTY)
+                        if (griddy[1][i].getType() != PieceTypes.EMPTY || griddy[1][i].getBlackAttacking())
                         {
                             return false;
                         }
                     }
-                    if (griddy[1][8].getType() == PieceTypes.ROOK && griddy[1][8].getColor() == PieceColor.WHITE)
+                    if (griddy[1][8].getType() == PieceTypes.ROOK && griddy[1][8].getColor() == PieceColor.WHITE && !griddy[1][5].getBlackAttacking() && !griddy[1][8].getBlackAttacking())
                     {
                         whiteHasCastled = true;
                         return true;
@@ -472,12 +480,12 @@ public class Main {
                 {
                     for (int i = 4; i > 1; i--) //if under attack
                     {
-                        if (griddy[1][i].getType() != PieceTypes.EMPTY)
+                        if (griddy[1][i].getType() != PieceTypes.EMPTY || griddy[1][i].getBlackAttacking())
                         {
                             return false;
                         }
                     }
-                    if (griddy[1][1].getType() == PieceTypes.ROOK && griddy[1][1].getColor() == PieceColor.WHITE)
+                    if (griddy[1][1].getType() == PieceTypes.ROOK && griddy[1][1].getColor() == PieceColor.WHITE && !griddy[1][5].getBlackAttacking() && !griddy[1][1].getBlackAttacking())
                     {
                         whiteHasCastled = true;
                         return true;
@@ -494,12 +502,12 @@ public class Main {
                 {
                     for (int i = 6; i < 8; i++) //if under attack
                     {
-                        if (griddy[8][i].getType() != PieceTypes.EMPTY)
+                        if (griddy[8][i].getType() != PieceTypes.EMPTY || griddy[8][i].getWhiteAttacking())
                         {
                             return false;
                         }
                     }
-                    if (griddy[8][8].getType() == PieceTypes.ROOK && griddy[8][8].getColor() == PieceColor.BLACK)
+                    if (griddy[8][8].getType() == PieceTypes.ROOK && griddy[8][8].getColor() == PieceColor.BLACK && !griddy[8][5].getWhiteAttacking() && !griddy[8][8].getWhiteAttacking())
                     {
                         blackHasCastled = true;
                         return true;
@@ -515,12 +523,12 @@ public class Main {
                 {
                     for (int i = 4; i > 1; i--) //if under attack
                     {
-                        if (griddy[8][i].getType() != PieceTypes.EMPTY)
+                        if (griddy[8][i].getType() != PieceTypes.EMPTY || griddy[8][i].getWhiteAttacking())
                         {
                             return false;
                         }
                     }
-                    if (griddy[8][1].getType() == PieceTypes.ROOK && griddy[8][1].getColor() == PieceColor.BLACK)
+                    if (griddy[8][1].getType() == PieceTypes.ROOK && griddy[8][1].getColor() == PieceColor.BLACK && !griddy[8][5].getWhiteAttacking() && !griddy[8][1].getWhiteAttacking())
                     {
                         blackHasCastled = true;
                         return true;
@@ -539,7 +547,140 @@ public class Main {
             System.out.println("Move not in range.");
             return false;
         }
-        //TODO: add an undo(would have to make a deep copy), under attack algorithm, make some way to initialize a grid from a text file(save to file with printwriter), Fischer random chess?
+        /*TODO: add an undo(would have to make a deep copy), make an AI player, 
+        add a check mechanic that forces the player to deal with check,
+        add a function to check if there is a checkmate on the board(if king has
+        no legal moves and is marked as under attack, else it's stalemate),
+        stop the game and announce the winner if checkmate or stalemate has occurred,
+        under attack algorithm(somehow change isMoveValid so that friendly pieces 
+        that you can move to are marked as under attack to prevent the enemy king
+        from being able to take protected pieces), make some way to initialize a 
+        grid from a text file(save to file with printwriter), Fischer random chess?,
+        online play, GUI*/
+    }
+    /*
+     * This function should run before each iteration of the big while loop.
+     * Before the function runs, every square should have both of its fields set to false.
+     */
+    public static void gridSquaresUnderAttack(Square[][] griddy)
+    { //use isMoveValid except for pawn and king
+        for (int i = 1; i < 9; i++)
+        {
+            for (int j = 1; j < 9; j++)
+            {
+                //griddy[i][j] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
+                if (griddy[i][j].getType() != PieceTypes.EMPTY)
+                {
+                    if (griddy[i][j].getType() != PieceTypes.PAWN && griddy[i][j].getType() != PieceTypes.KING)
+                    {
+                        if (griddy[i][j].getColor() == PieceColor.WHITE)
+                        {
+                            for (int k = 1; k < 9; k++)
+                            {
+                                for (int l = 1; l < 9; l++)
+                                {
+                                    if (isMoveValid(griddy[i][j].getDisplay(), new int[]{i, j, k, l}, griddy))
+                                    {
+                                        //System.out.println("You can attack.");
+                                        griddy[k][l].setWhiteAttacking(true);
+                                    }
+                                }
+                            }
+                        }
+                        else //black
+                        {
+                            for (int k = 1; k < 9; k++)
+                            {
+                                for (int l = 1; l < 9; l++)
+                                {
+                                    if (isMoveValid(griddy[i][j].getDisplay(), new int[]{i, j, k, l}, griddy))
+                                    {
+                                        //System.out.println("You can attack.");
+                                        griddy[k][l].setBlackAttacking(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (griddy[i][j].getType() == PieceTypes.PAWN)
+                    {
+                        if (griddy[i][j].getColor() == PieceColor.WHITE)
+                        {
+                            for (int k = 1; k < 9; k++)
+                            {
+                                for (int l = 1; l < 9; l++)
+                                {
+                                    if (Math.abs(l - j) == 1 && (k - i) == 1 /*&& griddy[k][l].getType() != PieceTypes.EMPTY /*&& griddy[k][l].getColor() == PieceColor.BLACK*/)
+                                    {
+                                        griddy[k][l].setWhiteAttacking(true);
+                                    }
+                                }
+                            }
+                        }
+                        else //black
+                        {
+                            for (int k = 1; k < 9; k++)
+                            {
+                                for (int l = 1; l < 9; l++)
+                                {
+                                    if (Math.abs(l - j) == 1 && (k - i) == -1 /*&& griddy[k][l].getType() != PieceTypes.EMPTY && griddy[k][l].getColor() == PieceColor.WHITE*/)
+                                    {
+                                        griddy[k][l].setBlackAttacking(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    /*else //PieceTypes.KING [doing king after all the other pieces]
+                    {
+
+                    }*/
+                }
+            }
+        }
+        for (int i = 1; i < 9; i++) //just king now
+        {
+            for (int j = 1; j < 9; j++)
+            {
+                if (griddy[i][j].getType() == PieceTypes.KING)
+                {
+                    if (griddy[i][j].getColor() == PieceColor.WHITE)
+                    {
+                        for (int k = 1; k < 9; k++)
+                        {
+                            for (int l = 1; l < 9; l++)
+                            {
+                                if (i == k && j == l)
+                                {
+                                    continue;
+                                }
+                                if (Math.abs(k - i) <= 1 && Math.abs(l - j) <= 1 && !griddy[k][l].getBlackAttacking())
+                                {
+                                    griddy[k][l].setWhiteAttacking(true);
+                                }
+                            }
+                        }
+                    }
+                    else //black
+                    {
+                        for (int k = 1; k < 9; k++)
+                        {
+                            for (int l = 1; l < 9; l++)
+                            {
+                                if (i == k && j == l)
+                                {
+                                    continue;
+                                }
+                                if (Math.abs(k - i) <= 1 && Math.abs(l - j) <= 1 && !griddy[k][l].getWhiteAttacking())
+                                {
+                                    griddy[k][l].setBlackAttacking(true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     //if knight, magnitude of vector between start (delta x and delta y) and end should be sqrt 5
     //if pawn, should only move one up if white or one down if black. if diagonal, should be piece on grid.
@@ -564,29 +705,44 @@ public class Main {
             {
                 grid[i][j] = new Square(PieceTypes.EMPTY, '_', PieceColor.EMPTY);
             }
-        }*/
-        //grid[2][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
-        //grid[4][5] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
-        //grid[1][1] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
-        //grid[8][8] = new Square(PieceTypes.ROOK, 'r', PieceColor.BLACK);
+        }
+        grid[6][4] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
+        grid[8][5] = new Square(PieceTypes.KING, 'k', PieceColor.BLACK);
+        grid[8][8] = new Square(PieceTypes.ROOK, 'r', PieceColor.BLACK);
+        grid[8][1] = new Square(PieceTypes.ROOK, 'r', PieceColor.BLACK);
+        /*grid[2][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        grid[4][5] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        grid[1][1] = new Square(PieceTypes.ROOK, 'R', PieceColor.WHITE);
+        grid[8][8] = new Square(PieceTypes.ROOK, 'r', PieceColor.BLACK);
         //make white uppercase and black lowercase, maybe make the board rotate 180 degrees inbetween turns
-        //grid[7][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
-        //grid[2][3] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
-        /*grid[4][4] = new Square(PieceTypes.KING, 'K', PieceColor.WHITE);
-        //grid[4][4] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
-        //grid[5][6] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
-        //grid[4][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
-        //grid[2][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
-        //grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
+        grid[7][4] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        grid[2][3] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        grid[4][4] = new Square(PieceTypes.KING, 'K', PieceColor.WHITE);
+        grid[4][4] = new Square(PieceTypes.KNIGHT, 'N', PieceColor.WHITE);
+        grid[5][6] = new Square(PieceTypes.KNIGHT, 'n', PieceColor.BLACK);
+        grid[4][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);
+        grid[2][3] = new Square(PieceTypes.PAWN, 'P', PieceColor.WHITE);
+        grid[5][4] = new Square(PieceTypes.QUEEN, 'q', PieceColor.BLACK);
         grid[7][6] = new Square(PieceTypes.PAWN, 'p', PieceColor.BLACK);*/
         printGridWhite(grid);
-        /*for (int i = 8; i >= 1; i--)
+        //gridSquaresUnderAttack(grid); USE THIS TO TEST FUNC, uncomment print below and set finished to be false.
+        /*for (int i = 1; i < 9; i++)
         {
-            for (int j = 1; j <= 8; j++)
+            for (int j = 1; j < 9; j++)
             {
-                System.out.print(grid[i][j].getDisplay() + " ");
+                if (grid[i][j].getBlackAttacking() && grid[i][j].getWhiteAttacking())
+                {
+                    System.out.println("White and Black attacking square [" + i + ", " + j + "] (row, column)");
+                }
+                else if (grid[i][j].getBlackAttacking())
+                {
+                    System.out.println("Black attacking square [" + i + ", " + j + "] (row, column)");
+                }
+                else if (grid[i][j].getWhiteAttacking())
+                {
+                    System.out.println("White attacking square [" + i + ", " + j + "] (row, column)");
+                }
             }
-            System.out.println();
         }*/
         boolean firstTime = true;
         boolean finished = true;
@@ -599,6 +755,33 @@ public class Main {
         boolean invalidFormatting = true; //used for first loop
         //boolean dontDecreaseEnPassant = false;
         System.out.println("Current canEnPassant Value: " + canEnPassant);
+        for (int i = 1; i < 9; i++)
+        {
+            for (int j = 1; j < 9; j++)
+            {
+                grid[i][j].setWhiteAttacking(false);
+                grid[i][j].setBlackAttacking(false);
+            }
+        }
+        gridSquaresUnderAttack(grid);
+        /*for (int i = 1; i < 9; i++)
+        {
+            for (int j = 1; j < 9; j++)
+            {
+                if (grid[i][j].getBlackAttacking() && grid[i][j].getWhiteAttacking())
+                {
+                    System.out.println("White and Black attacking square [" + i + ", " + j + "] (row, column)");
+                }
+                else if (grid[i][j].getBlackAttacking())
+                {
+                    System.out.println("Black attacking square [" + i + ", " + j + "] (row, column)");
+                }
+                else if (grid[i][j].getWhiteAttacking())
+                {
+                    System.out.println("White attacking square [" + i + ", " + j + "] (row, column)");
+                }
+            }
+        }*/
         while (invalidFormatting)
         {
             System.out.println("Enter a move in this 5-character format: [PieceLetter][StartCoord][EndCoord]");
@@ -640,9 +823,6 @@ public class Main {
             }
             else
             {
-                //System.out.println("Cool");
-                //eventually remove this and deal with it in isMoveValid
-                // replace if else with this: if (isMoveValid(piece, moveSummary, grid)) move the piece, else say move invalid
                 if (isMoveValid(piece, moveSummary, grid))
                 {
                     dontDecreaseEnPassant = false;
@@ -685,7 +865,6 @@ public class Main {
                                 }
                             }
                             else if (Math.abs(endColumn - startColumn) == 2 && (piece == 'K' || piece == 'k') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.KING)
-                            //add system to isMoveValid to check if path between king and rook is clear
                             {
                                 if (endColumn - startColumn == 2)
                                 {
@@ -766,7 +945,6 @@ public class Main {
                                 }
                             }
                             else if (Math.abs(endColumn - startColumn) == 2 && (piece == 'K' || piece == 'k') && grid[moveSummary[0]][moveSummary[1]].getType() == PieceTypes.KING)
-                            //add system to isMoveValid to check if path between king and rook is clear
                             {
                                 if (endColumn - startColumn == 2)
                                 {
