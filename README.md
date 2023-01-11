@@ -1,6 +1,7 @@
 # Chess
 This is my attempt to create a chess game.      
 This will be my largest project ever, and will likely take quite some time to complete.    
+
 Update on 1/8/23: The game is now completely functional! I still have many different ideas for what to add, though.    
 
 Update on 1/10/23: I have added three other game rules: promoting, castling, and en passant.    
@@ -24,6 +25,8 @@ For now, I think I will just leave this issue alone and instead focus on adding 
 -Add function to load board states from a file or even save?    
 -Add an undo button(would require me to make a deep copy of the grid array and a copy constructor for Square)    
 -Fischer random chess?    
+-Make the game work online    
+-Add a GUI    
 
 # How to run      
 First, make sure you have Java installed. Put each .java file in the same directory, then open the directory in cmd.     
